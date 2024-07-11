@@ -13,6 +13,34 @@ const openai = new OpenAI({
 
 const filePath = "./parsed-text/adidas-parsed-text.txt";
 
+const systemPrompt = `
+Please analyze the following Terms and Conditions text and extract the key points. Structure the output in the following JSON format:
+
+{
+    "toc_analysis": {
+        "summary": "Brief summary of the ToC...",
+        "sections": [
+            {
+                "title": "Section Title",
+                "content": "Detailed content of the section...",
+                "highlights": [
+                    "Key point 1",
+                    "Key point 2",
+                    ...
+                ]
+            },
+            ...
+        ],
+        "metadata": {
+            "document_title": "Title of the document",
+            "last_updated": "Date of the last update",
+            "author": "Author of the document"
+        }
+    }
+}
+`;
+
+
 const app = express();
 const port = 3000;
 
@@ -28,13 +56,11 @@ app.get("/", async (req, res) => {
     const fileContent = await fs.readFile(filePath, 'utf-8')
     let response = "" 
     const stream = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [{ 
-        role: "system",
-        content: "Regardless of what the content is, repeat this: I am chatgpt", 
-        role: "user", 
-        content: fileContent,
-      }],
+      model: "ft:gpt-3.5-turbo-0125:personal::9jtCCJzU",
+      messages: [
+        { role: "system", content: systemPrompt }, 
+        { role: "user", content: fileContent} 
+      ],
       stream: true,
     });
     
